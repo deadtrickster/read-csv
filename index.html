@@ -1,0 +1,916 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>read-csv</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="title" content="read-csv"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2013-01-08T08:48-0700"/>
+<meta name="author" content="Warren Wilkinson"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  {margin-left:auto; margin-right:0px;  text-align:right;}
+  .left   {margin-left:0px;  margin-right:auto; text-align:left;}
+  .center {margin-left:auto; margin-right:auto; text-align:center;}
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top;  }
+  th.right  { text-align:center;  }
+  th.left   { text-align:center;   }
+  th.center { text-align:center; }
+  td.right  { text-align:right;  }
+  td.left   { text-align:left;   }
+  td.center { text-align:center; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  div.inlinetask {
+    padding:10px;
+    border:2px solid gray;
+    margin:10px;
+    background: #ffffcc;
+  }
+  textarea { overflow-x: auto; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012  Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">read-csv</h1>
+
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 Overview</a>
+<ul>
+<li><a href="#sec-1-1">1.1 Features</a></li>
+</ul>
+</li>
+<li><a href="#sec-2">2 Installation</a>
+<ul>
+<li><a href="#sec-2-1">2.1 Quick Lisp</a></li>
+<li><a href="#sec-2-2">2.2 Gentoo</a></li>
+<li><a href="#sec-2-3">2.3 Ubunto</a></li>
+<li><a href="#sec-2-4">2.4 Manual Installation</a></li>
+<li><a href="#sec-2-5">2.5 Running the Tests</a></li>
+<li><a href="#sec-2-6">2.6 Getting Support</a></li>
+</ul>
+</li>
+<li><a href="#sec-3">3 Implementation</a>
+<ul>
+<li><a href="#sec-3-1">3.1 Collecting the Input</a></li>
+<li><a href="#sec-3-2">3.2 Traversing the Input</a></li>
+<li><a href="#sec-3-3">3.3 Parsing whole files: parse-csv</a></li>
+<li><a href="#sec-3-4">3.4 Test Framework</a>
+<ul>
+<li><a href="#sec-3-4-1">3.4.1 Parse-csv tests</a></li>
+<li><a href="#sec-3-4-2">3.4.2 Running Tests</a></li>
+</ul></li>
+</ul>
+</li>
+<li><a href="#sec-4">4 Tests Expressions</a>
+<ul>
+<li><a href="#sec-4-1">4.1 Blanks</a></li>
+<li><a href="#sec-4-2">4.2 Quotes and Tricky Characters</a></li>
+<li><a href="#sec-4-3">4.3 International Text</a></li>
+</ul>
+</li>
+<li><a href="#sec-5">5 License</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Overview</h2>
+<div class="outline-text-2" id="text-1">
+
+
+<p>
+read-csv is a stream oriented CSV (comma-separated value) reader that supports excel .csv files.
+</p>
+
+
+
+<pre class="example">  (with-open-file (s "/path/to/csv")
+    (parse-csv s))
+;; Returns a list of lists of strings.
+</pre>
+
+
+
+</div>
+
+<div id="outline-container-1-1" class="outline-3">
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> Features</h3>
+<div class="outline-text-3" id="text-1-1">
+
+
+<ul>
+<li>Low line of code count (around 50 lines of code)
+</li>
+<li>Supports quotes, including newlines and separator characters within the quotes.
+</li>
+<li>Supports Unix style LF line endings and Dos CRLF line endings. (automatically)
+</li>
+</ul>
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Installation</h2>
+<div class="outline-text-2" id="text-2">
+
+
+</div>
+
+<div id="outline-container-2-1" class="outline-3">
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> Quick Lisp</h3>
+<div class="outline-text-3" id="text-2-1">
+
+
+<p>
+Install <a href="http://www.quicklisp.org/beta/">Quick Lisp</a> and then run:
+</p>
+
+
+
+<pre class="example">(ql:quickload 'read-csv)
+</pre>
+
+
+<p>
+If you have problems, see the <a href="#support">support</a> section, and you may want to <a href="#runtests">run the tests</a>.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-2" class="outline-3">
+<h3 id="sec-2-2"><span class="section-number-3">2.2</span> Gentoo</h3>
+<div class="outline-text-3" id="text-2-2">
+
+
+<p>
+As root, 
+</p>
+
+
+
+<pre class="example">emerge read-csv
+</pre>
+
+
+<p>
+Once the emerge is finished, the package can be loaded using ASDF:
+</p>
+
+
+<pre class="example">(asdf:operate 'asdf:load-op :read-csv)
+</pre>
+
+
+<p>
+If you have problems, see the <a href="#support">support</a> section, otherwise you may want to <a href="#runtests">run the tests</a>.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-3" class="outline-3">
+<h3 id="sec-2-3"><span class="section-number-3">2.3</span> Ubunto</h3>
+<div class="outline-text-3" id="text-2-3">
+
+
+
+
+
+<pre class="example">sudo apt-get install read-csv
+</pre>
+
+
+<p>
+Once the installation is finished, the package is loadable using ASDF:
+</p>
+
+
+
+<pre class="example">(asdf:operate 'asdf:load-op :read-csv)
+</pre>
+
+
+<p>
+If you have problems, see the <a href="#support">support</a> section, otherwise you may want to <a href="#runtests">run the tests</a>.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-4" class="outline-3">
+<h3 id="sec-2-4"><span class="section-number-3">2.4</span> Manual Installation</h3>
+<div class="outline-text-3" id="text-2-4">
+
+
+<p>
+In summary: Untar the <a href="https://github.com/WarrenWilkinson/read-csv/archive/master.tar.gz">.tar</a> package and then symlink the .asd files into a place where ASDF can find them. 
+</p>
+<ol>
+<li>Untar the files where you want them to be.  On windows download the <a href="https://github.com/WarrenWilkinson/read-csv/archive/master.zip">.zip</a> and unzip it instead, it's the same files.
+</li>
+<li>ASDF could be looking anywhere &ndash; it depends on your setup.  Run this in your lisp repl to get a clue
+     as to where ASDF is seeking libraries<sup><a class="footref" name="fnr-.1" href="#fn-.1">1</a></sup>:
+
+
+
+
+<pre class="example">(mapcan #'funcall asdf:*default-source-registries*)
+</pre>
+
+
+</li>
+<li>Symlink the .asd files to the source directory. If you use windows, <a href="http://bc.tech.coop/blog/041113.html">these instructions on symlink alternatives apply to you</a>.
+</li>
+</ol>
+
+
+<p>
+Once the files are in place, the package can be loaded with ASDF by:
+</p>
+
+
+<pre class="example">(asdf:operate 'asdf:load-op :read-csv)
+</pre>
+
+
+<p>
+If you have problems, see the <a href="#support">support</a> section.  If you don't have problems you may want to <a href="#runtests">run the tests</a> anyway, because you can.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-5" class="outline-3">
+<h3 id="sec-2-5"><span class="section-number-3">2.5</span> Running the Tests</h3>
+<div class="outline-text-3" id="text-2-5">
+
+
+<p>
+Once the system is loaded, it can be tested with asdf. 
+</p>
+
+
+
+<pre class="example">(asdf:operate 'asdf:test-op :read-csv)
+</pre>
+
+
+<p>
+This should display something like the following. There should
+be <b>zero failures</b>, if you have failures see the <a href="#support">support</a> section
+of this document.
+</p>
+
+
+
+<pre class="example">RUNNING READ-CSV TESTS...
+READ-CSV TEST RESULTS: 
+     Tests: 519
+   Success: 519
+  Failures: 0
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-2-6" class="outline-3">
+<h3 id="sec-2-6"><span class="section-number-3">2.6</span> Getting Support</h3>
+<div class="outline-text-3" id="text-2-6">
+
+
+<p>
+You can find support on this libraries <a href="http://warrenwilkinson.ca/read-csv">website</a> and/or <a href="https://github.com/WarrenWilkinson/read-csv">github</a> repository. Or you can email <a href="mailto:warrenwilkinson@gmail.com">Warren Wilkinson</a>.
+</p>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Implementation</h2>
+<div class="outline-text-2" id="text-3">
+
+
+<p>
+Most Lisp CSV readers hover around 400 lines of code. This one is 68. 
+</p>
+<p>
+The difference is this one is coded as state machine in a dense 2D grid, as described in <a href="http://galileo.phys.virginia.edu/classes/551.jvn.fall01/fsm.html">FINITE State Machines in Forth</a>. "If you are in this <i>state</i> and you see
+this <i>character</i> then you &hellip;" 
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup><col class="left" /><col class="left" /><col class="left" /><col class="left" /><col class="left" /><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left"><b>state</b></th><th scope="col" class="left"><b>white</b></th><th scope="col" class="left"><b>return</b></th><th scope="col" class="left"><b>linefeed</b></th><th scope="col" class="left"><b>quote</b></th><th scope="col" class="left"><b>separator</b></th><th scope="col" class="left"><b>other</b></th></tr>
+</thead>
+<tbody>
+<tr><td class="left"><b>start</b></td><td class="left">noop -&gt;start</td><td class="left">ship -&gt;return</td><td class="left">ship -&gt;done!</td><td class="left">noop -&gt;quote</td><td class="left">next -&gt;start</td><td class="left">addc -&gt;unquote</td></tr>
+<tr><td class="left"><b>return</b></td><td class="left">noop -&gt;start</td><td class="left">ship -&gt;return</td><td class="left">noop -&gt;done!</td><td class="left">noop -&gt;start</td><td class="left">next -&gt;start</td><td class="left">addc -&gt;unquote</td></tr>
+<tr><td class="left"><b>unquote</b></td><td class="left">addc -&gt;unquote</td><td class="left">ship -&gt;return</td><td class="left">ship -&gt;done!</td><td class="left">addc -&gt;unquote</td><td class="left">next -&gt;start</td><td class="left">addc -&gt;unquote</td></tr>
+<tr><td class="left"><b>quote</b></td><td class="left">addc -&gt;quote</td><td class="left">noop -&gt;q+ret</td><td class="left">addl -&gt;quote</td><td class="left">noop -&gt;q+quote</td><td class="left">addc -&gt;quote</td><td class="left">addc -&gt;quote</td></tr>
+<tr><td class="left"><b>q+ret</b></td><td class="left">addc -&gt;quote</td><td class="left">noop -&gt;q+ret</td><td class="left">addl -&gt;quote</td><td class="left">noop -&gt;q+quote</td><td class="left">addc -&gt;quote</td><td class="left">addc -&gt;quote</td></tr>
+<tr><td class="left"><b>q+quote</b></td><td class="left">noop -&gt;q+q&amp;w</td><td class="left">ship -&gt;return</td><td class="left">ship -&gt;done!</td><td class="left">addc -&gt;quote</td><td class="left">next -&gt;start</td><td class="left">addc -&gt;unquote</td></tr>
+<tr><td class="left"><b>q+q&amp;w</b></td><td class="left">noop -&gt;q+q&amp;w</td><td class="left">ship -&gt;return</td><td class="left">ship -&gt;done!</td><td class="left">addc -&gt;quote</td><td class="left">next -&gt;start</td><td class="left">addc -&gt;unquote</td></tr>
+</tbody>
+</table>
+
+
+<ol>
+<li>perform the designated function, and 2) transition to the designated new state. 
+</li>
+</ol>
+
+
+<p>
+For example, if we start <i>(e.g. state start)</i> and spot quote, then we perform noop and change to quote state.
+Then, in the quote state, if we spot '<i>A</i>', perform 'addc' (add character) and remain in the quote state. 
+</p>
+
+</div>
+
+<div id="outline-container-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> Collecting the Input</h3>
+<div class="outline-text-3" id="text-3-1">
+
+
+<p>
+The functions used by the above table are:
+</p>
+<dl>
+<dt>noop</dt><dd>Do no action
+</dd>
+<dt>addc</dt><dd>Add a character to the current CSV record.
+</dd>
+<dt>addl</dt><dd>Add a newline character to the current CSV record.
+</dd>
+<dt>next</dt><dd>Finish the current CSV record and start the next.
+</dd>
+<dt>ship</dt><dd>Cleanup the current set of CSV records for returning them to the end user.
+</dd>
+</dl>
+
+
+<p>
+Internally, these methods play with three dynamic variables:  <b>\*record\*</b> and <b>\*records\*</b> and <b>\*white-char-count\*</b>. 
+The first, during run time, holds a list of characters &ndash; in reverse order. The second holds the list of parsed records &ndash; also in
+reverse order (but each record in proper order).  The <b>next</b> method reverses the order and coerces the csv data to
+a string. The <b>ship</b> method reverses the <b>\*records\*</b> list so it's in proper order.
+</p>
+<p>
+The last variable, \*white-char-count* keeps a count of how many characters we've seen since after the quote. It's used
+to let us to remove whitespace characters after the closing quote without removing whitespace characters within
+the quotes.
+</p>
+
+
+
+<pre class="example">(defun noop (c) (declare (ignore c)))
+(defun addc (c) (push c *record*))
+(defun addl (c) (declare (ignore c)) (push #\Newline *record*))
+(flet ((white (c) (or (char= c #\Space) (char= c #\Tab))))
+  (defun next (c) 
+    (declare (ignore c))
+    (let ((eow (or (position-if-not #'white *record*) (length *record*))))
+      (push (coerce (nreverse (nthcdr (max 0 (min eow (1- *white-char-count*))) *record*)) 'string) *records*))
+    (setf *record* nil)))
+(defun ship (c) (next c) (setf *records* (nreverse *records*)))
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-3-2" class="outline-3">
+<h3 id="sec-3-2"><span class="section-number-3">3.2</span> Traversing the Input</h3>
+<div class="outline-text-3" id="text-3-2">
+
+
+<p>
+We read CSV by running our state machine until the <i>done</i> state is reached. 
+</p>
+
+
+
+<pre class="example">(defun char-class (sep char)
+  (case char (#\Space 0) (#\Return 1) (#\Linefeed 2) (#\" 3) (otherwise (if (char= sep char) 4 5))))
+
+(defun read-csv (stream &amp;optional (sep #\,) (eof-error-p t) eof-value)
+  "Return CSV data and a second value that's true if row ended by EOF."
+  (let ((*records* nil)
+        (*record* nil)
+        (*white-char-count* 0))
+    (declare (special *record* *records* *white-char-count*))
+    (loop with state = start
+          for char = (read-char stream (and (null *records*) eof-error-p) :eof)
+          when (eq char :eof) 
+          do (return-from read-csv (values (if *records* (ship :eof) eof-value) t))
+          do (incf *white-char-count*)
+          do (let ((class (char-class sep char)))
+               (when (= class quote) (setf *white-char-count* 0))
+               (funcall (aref +csv-table+ state class 0) char)
+               (setf state (aref +csv-table+ state class 1)))
+       until (eq state done!))
+    (values *records* (eq :eof (peek-char nil stream nil :eof)))))
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-3-3" class="outline-3">
+<h3 id="sec-3-3"><span class="section-number-3">3.3</span> Parsing whole files: parse-csv</h3>
+<div class="outline-text-3" id="text-3-3">
+
+
+<p>
+To parse a whole file, the utility parse-csv calls read-csv until the end-of-file.
+</p>
+
+
+
+<pre class="example">(defun parse-csv (stream  &amp;optional (sep #\,))
+  (loop for (line end-p) = (multiple-value-list (read-csv stream sep nil :eof))
+        unless (eq line :eof) collect line
+        until end-p))
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-3-4" class="outline-3">
+<h3 id="sec-3-4"><span class="section-number-3">3.4</span> Test Framework</h3>
+<div class="outline-text-3" id="text-3-4">
+
+
+<p>
+The test framework combines jumbles of CSV statements and calls read-csv on them.  In practice it means I take
+(upto) 5 patterns, sequentially, from the a predefined list of hard patterns.  Then I take all permutations
+(120, if 5 patterns) and combine them as 1 record per row (and 5 rows), 2 per row, 3 per row, 4 per row and 5 per row.
+Then I test that I can parse it back correctly.
+</p>
+<p>
+The jumbler is shown below, but I also test parse-csv by parsing larger examples but that is not shown here.
+</p>
+
+
+
+<pre class="example">
+(defun concat-with (strings item)
+  (if (null strings)
+      ""
+      (apply #'concatenate 'string (first strings) (mapcan #'(lambda (a) (list item a)) (rest strings)))))
+
+(defun build-answers (i strings)
+  (loop while strings
+        collect (loop for n upto (1- i)
+                      while strings 
+                      collect (car strings)
+                      do (setf strings  (cdr strings)))))
+
+(defun build-string (i strings)
+  (concatenate 'string 
+     (concat-with (mapcar #'(lambda (s) (concat-with s ",")) (build-answers i strings)) (list #\Newline))
+     '(#\Newline)))
+
+(defun all-combinations (patterns) 
+   (if (null (cdr patterns))
+       (list patterns)
+       (loop for i in patterns
+             nconc (mapcar #'(lambda (p) (cons i p)) (all-combinations (remove i patterns))))))
+
+(defun make-test (description)
+  #'(lambda ()
+      (block test
+        ;(loop for pattern in (all-combinations description)
+        (format t "~%Pattern: ~s" (substitute #\' #\" (remove #\Newline (build-string (length description) (mapcar #'car description)))))
+        (dotimes (i (length description) t)
+          (format t "~%  @~d" i)
+          (let ((string (build-string (1+ i) (mapcar #'car description)))
+                (answers (build-answers (1+ i) (mapcar #'cdr description))))
+            (with-input-from-string (s string)
+              (loop for answer in answers
+                    for (got end) = (multiple-value-list (read-csv s))
+                    unless (equalp answer got)
+                    do (format t "~%Expected ~a, got ~a" answer got)
+                    and do (return-from test nil)
+                    if (eq answer (car (last answers)))
+                    unless end
+                    do (format t "~%Expected EOF, but didn't see it!")
+                    unless (not end)
+                    do (format t "~%Did not expect EOF, but saw it!"))
+              (let ((read-more (read-csv s #\, nil :eof)))
+              (unless (eq read-more :eof)
+                (format t "~%Could read past end: ~s" read-more)
+                (return-from test nil)))))))))
+
+
+</pre>
+
+
+
+</div>
+
+<div id="outline-container-3-4-1" class="outline-4">
+<h4 id="sec-3-4-1"><span class="section-number-4">3.4.1</span> Parse-csv tests</h4>
+<div class="outline-text-4" id="text-3-4-1">
+
+
+<p>
+These tests were yanked from <a href="https://github.com/AccelerationNet/cl-csv">CL-CSV</a>, another Lisp CSV parser.
+</p>
+
+
+
+<pre class="example">(defmacro deftest (name code result)
+  `(defun ,name ()
+     (format t "~%~a" ',name)
+     (let ((expect ,result)
+           (got ,code))
+       (if (equalp expect got)
+           t
+           (progn (format t "~%Expected~% ~s~%but got~%~s" expect got)
+                  nil)))))
+
+(defvar *a-tough-example-answer* '(("very tough" "easier to do")))
+(defun a-tough-example () 
+  (with-input-from-string (s "  \"very tough\"   ,    easier to do     
+")
+    (parse-csv s)))
+
+(deftest test-tough (a-tough-example) *a-tough-example-answer*)
+
+(defvar *big-example-answer*
+  '(("first name" "last name"   "job \"title\""                      "number of hours" "id")
+    ("Russ"       "Tyndall"     "Software Developer's, \"Position\"" "26.2"            "1")
+    ("Adam"       "Smith"       "Economist"                          "37.5"            "2")
+    ("John"       "Doe"         "Anonymous Human"                    "42.1"            "3")
+    ("Chuck"      "Darwin"      "Natural Philosopher"                "17.68"           "4")
+    ("Bill"       "Shakespeare" "Bard"                               "12.2"            "5")
+    ("James"      "Kirk"        "Starship Captain"                   "13.1"            "6")
+    ("Bob"        "Anon"        ""                                   "13.1"            "6")
+    ("Mr"         "Iñtërnâtiônàlizætiøn" ""                          "1.1"             "0")))
+
+(defun big-example () 
+  (with-input-from-string (s "first name,last name,\"job \"\"title\"\"\",number of hours,id
+Russ,Tyndall,\"Software Developer's, \"\"Position\"\"\",26.2,1
+Adam,Smith,Economist,37.5,2
+John,Doe,Anonymous Human,42.1,3
+Chuck,Darwin,Natural Philosopher,17.68,4
+Bill,Shakespeare,Bard,12.2,5
+James,Kirk,Starship Captain,13.1,6
+Bob,Anon,,13.1,6
+Mr,Iñtërnâtiônàlizætiøn,,1.1,0")
+    (parse-csv s)))
+
+
+(defun quoted-big-example () 
+  (with-input-from-string 
+      (s "\"first name\",\"last name\",\"job \"\"title\"\"\",\"number of hours\",\"id\"
+\"Russ\",\"Tyndall\",\"Software Developer's, \"\"Position\"\"\",\"26.2\",\"1\"
+\"Adam\",\"Smith\",\"Economist\",\"37.5\",\"2\"
+\"John\",\"Doe\",\"Anonymous Human\",\"42.1\",\"3\"
+\"Chuck\",\"Darwin\",\"Natural Philosopher\",\"17.68\",\"4\"
+\"Bill\",\"Shakespeare\",\"Bard\",\"12.2\",\"5\"
+\"James\",\"Kirk\",\"Starship Captain\",\"13.1\",\"6\"
+\"Bob\",\"Anon\",\"\",\"13.1\",\"6\"
+\"Mr\",\"Iñtërnâtiônàlizætiøn\",\"\",\"1.1\",\"0\"")
+    (parse-csv s)))
+
+(deftest test-big        (big-example)        *big-example-answer*)
+(deftest test-quoted-big (quoted-big-example) *big-example-answer*)
+
+(defvar *multiline-answer*
+  '(("this" "is" "a" "test
+of
+multiline" "data")
+    ("row2" "of" "the" "test
+of
+multiline" "data")))
+
+(defun multiline-unix-example () 
+  (with-input-from-string (s "this,is,a,\"test
+of
+multiline\", data
+row2,of,the,\"test
+of
+multiline\", data")
+    (parse-csv s)))
+
+(defun multiline-dos-example ()
+  (with-input-from-string 
+      (s (concatenate 'string "this,is,a,\"test" (list #\Return #\Linefeed)
+                      "of" (list #\Return #\Linefeed)
+                      "multiline\", data" (list #\Return #\Linefeed)
+                      "row2,of,the,\"test" (list #\Return #\Linefeed)
+                      "of" (list #\Return #\Linefeed)
+                      "multiline\", data" (list #\Return #\Linefeed)))
+    (parse-csv s)))
+
+(defun multiline-mixed-example ()
+  (with-input-from-string
+      (s (concatenate 'string "this,is,a,\"test" (list #\Linefeed)
+                      "of" (list #\Return #\Linefeed)
+                      "multiline\", data" (list #\Return #\Linefeed)
+                      "row2,of,the,\"test" (list #\Linefeed)
+                      "of" (list #\Return #\Linefeed)
+                      "multiline\", data" (list #\Linefeed)))
+    (parse-csv s)))
+
+(deftest test-multiline-unix  (multiline-unix-example)  *multiline-answer*)
+(deftest test-multiline-dos   (multiline-dos-example)   *multiline-answer*)
+(deftest test-multiline-mixed (multiline-mixed-example) *multiline-answer*)
+
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-3-4-2" class="outline-4">
+<h4 id="sec-3-4-2"><span class="section-number-4">3.4.2</span> Running Tests</h4>
+<div class="outline-text-4" id="text-3-4-2">
+
+
+
+
+
+<pre class="example">(defstruct results
+  (tests 0)
+  (failures nil))
+(defun results-failure-count (results)
+  (length (results-failures results)))
+(defun results-successes (results)
+  (- (results-tests results)
+     (results-failure-count results)))
+
+(defun runtest (fun results)
+  (let* ((success t)
+         (output (with-output-to-string (*standard-output*)
+                   (setf success (handler-case (funcall fun)
+                                   (error (e) (princ e) nil))))))
+    (make-results
+     :tests (1+ (results-tests results))
+     :failures (if success
+                   (results-failures results)
+                   (acons fun output (results-failures results))))))
+
+(defun present-failures (results)
+  (format t "~%READ-CSV FAILURES:~%")
+  (loop for (fn . problems) in (results-failures results)
+        do (format t "~%~a~a~%" fn problems)))
+(defun present-results (results)
+  (format t "~%READ-CSV TEST RESULTS:")
+  (format t "~%     Tests: ~a~%   Success: ~a~%  Failures: ~a" 
+          (results-tests results)
+          (results-successes results)
+          (results-failure-count results))
+  (when (results-failures results)
+    (present-failures results)))
+
+(defun run-combination-tests (starting-results)
+  (reduce #'(lambda (description results) (runtest (make-test description) results))
+           (nreverse (mapcan #'(lambda (thing) (all-combinations (subseq thing 0 (min (length thing) 5))))
+                    (loop for i on (reverse *all-statements*) collecting i)))
+           :from-end t
+           :initial-value starting-results))
+
+(defun run-explicit-tests (starting-results)
+  (reduce #'(lambda (results function) (runtest function results))
+           (list #'test-tough
+                 #'test-big
+                 #'test-quoted-big
+                 #'test-multiline-unix
+                 #'test-multiline-dos
+                 #'test-multiline-mixed)
+           :initial-value starting-results))
+
+(defun run-tests ()
+  (format t "~%RUNNING READ-CSV TESTS...")
+  (present-results (run-explicit-tests (run-combination-tests (make-results)))))
+
+</pre>
+
+
+<p>
+The bulk of the test code just has to do with collecting results and making pretty output.
+</p>
+</div>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> Tests Expressions</h2>
+<div class="outline-text-2" id="text-4">
+
+
+<p>
+This package is tested by combining tricky CSV parts in numerous ways, and then
+ensuring the parser can parse them correctly.
+</p>
+
+</div>
+
+<div id="outline-container-4-1" class="outline-3">
+<h3 id="sec-4-1"><span class="section-number-3">4.1</span> Blanks</h3>
+<div class="outline-text-3" id="text-4-1">
+
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup><col class="left" /><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left"><b>CSV</b></th><th scope="col" class="left"><b>Should Parse</b></th><th scope="col" class="left"><b>Note</b></th></tr>
+</thead>
+<tbody>
+<tr><td class="left">&gt;&lt;</td><td class="left">&gt;&lt;</td><td class="left">blank input</td></tr>
+<tr><td class="left">&gt; \t &lt;</td><td class="left">&gt;&lt;</td><td class="left">whitespace input, <b>should be ignored.</b></td></tr>
+<tr><td class="left">&gt;""&lt;</td><td class="left">&gt;&lt;</td><td class="left">blank input, but quoted, should be empty</td></tr>
+<tr><td class="left">&gt;" \t "&lt;</td><td class="left">&gt; \t &lt;</td><td class="left">blank input, but quoted, <b>should keep the whitespace.</b></td></tr>
+</tbody>
+</table>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-4-2" class="outline-3">
+<h3 id="sec-4-2"><span class="section-number-3">4.2</span> Quotes and Tricky Characters</h3>
+<div class="outline-text-3" id="text-4-2">
+
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup><col class="left" /><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left"><b>CSV</b></th><th scope="col" class="left"><b>Should Parse</b></th><th scope="col" class="left"><b>Note</b></th></tr>
+</thead>
+<tbody>
+<tr><td class="left">&gt;"multi\nline"&lt;</td><td class="left">&gt;multi\nline&lt;</td><td class="left">Multiline input should work</td></tr>
+<tr><td class="left">&gt;","&lt;</td><td class="left">&gt;,&lt;</td><td class="left">Should be able to have seperator characters</td></tr>
+<tr><td class="left">&gt;""""&lt;</td><td class="left">&gt;"&lt;</td><td class="left">Double quotes should become a single quote.</td></tr>
+</tbody>
+</table>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-4-3" class="outline-3">
+<h3 id="sec-4-3"><span class="section-number-3">4.3</span> International Text</h3>
+<div class="outline-text-3" id="text-4-3">
+
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup><col class="left" /><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left"><b>CSV</b></th><th scope="col" class="left"><b>Should Parse</b></th><th scope="col" class="left"><b>Note</b></th></tr>
+</thead>
+<tbody>
+<tr><td class="left">&gt;"êve,y\nth还ng\tat""once"&lt;</td><td class="left">&gt;êve,y\nth还ng\tat"once&lt;</td><td class="left">Everything at once</td></tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> License</h2>
+<div class="outline-text-2" id="text-5">
+
+
+<p>
+Read-csv is distributed under the <a href="http://opensource.org/licenses/lgpl-2.1.php">LGPL2</a> License. 
+</p>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+<p class="footnote"><sup><a class="footnum" name="fn-.1" href="#fnr-.1">1</a></sup> you might need to (require 'asdf) before running this example
+</p>
+
+
+</div>
+</div>
+
+</div>
+</div>
+</div>
+
+<div id="postamble">
+<p class="date">Date: 2013-01-08T08:48-0700</p>
+<p class="author">Author: Warren Wilkinson</p>
+<p class="creator"><a href="http://orgmode.org">Org</a> version 7.9.2 with <a href="http://www.gnu.org/software/emacs/">Emacs</a> version 24</p>
+<a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
+
+</div>
+</body>
+</html>
